@@ -1,0 +1,93 @@
+import os
+from crewai import Agent, Task, Crew, Process
+from langchain_openai import ChatOpenAI
+
+# ==========================================
+# 1. 环境与模型配置
+# ==========================================
+# 填入你的大模型 API Key（这里以 OpenAI 为例，你也可以替换为通义千问、DeepSeek 等兼容的 API）
+os.environ["OPENAI_API_KEY"] = "sk-your-api-key-here"
+# 推荐使用具有长上下文能力和强逻辑推理的模型
+llm = ChatOpenAI(model="gpt-4-turbo", temperature=0.7)
+
+# ==========================================
+# 2. 定义 Agents (AI 员工)
+# ==========================================
+
+data_analyst = Agent(
+    role='首席数据解析师',
+    goal='从混乱的原始聊天记录中提取出目标人物的语言风格、核心观点和性格特质。',
+    backstory='你是一个精通自然语言处理与心理画像的数据专家，擅长从毫无逻辑的文本碎屑和日常口水话中，精准捕捉一个人的说话习惯、情绪触发点和隐藏性格。',
+    verbose=True,
+    allow_delegation=False,
+    llm=llm
+)
+
+persona_engineer = Agent(
+    role='AI 灵魂架构师',
+    goal='基于数据分析报告，构建一段完美、严谨且极具代入感的角色系统提示词（System Prompt）。',
+    backstory='你是一位顶级 Prompt 工程师。你能够将人物的性格缺陷、口头禅转化为大模型能绝对服从的指令格式。你的目标是让 AI 完美“夺舍”目标人物。',
+    verbose=True,
+    allow_delegation=False,
+    llm=llm
+)
+
+qa_tester = Agent(
+    role='角色扮演质检员',
+    goal='测试生成的 AI 分身，找出“出戏”的漏洞并提出修改建议。',
+    backstory='你是一个极其挑剔的测试员。你会假装是目标人物的朋友/前任，用刁钻、充满情绪的话术去攻击刚生成的 AI 分身，确保它回答的语气绝对符合设定。',
+    verbose=True,
+    allow_delegation=False, # 测试员不需要把工作委派给别人
+    llm=llm
+)
+
+# ==========================================
+# 3. 定义 Tasks (工作流任务)
+# ==========================================
+
+# 假设这是用户上传并经过初步清洗的聊天数据（实际应用中，这部分应从前端文件读取）
+raw_chat_data = """
+2026-03-01 A: 你到底怎么想的？昨天又放我鸽子。
+2026-03-01 B: 哎呀对不起嘛，老板突然让我加班，烦死了。你别总是这么上纲上线好不好？
+2026-03-01 A: 我上纲上线？这是态度问题！
+2026-03-01 B: 行行行，我的错，我给你转账买杯奶茶可以了吧，无语了真滴。
+"""
+
+task1_analyze_data = Task(
+    description=f'阅读以下聊天记录样本，分析"B"这个人的性格特质、惯用语气（如：哎呀、无语了真滴）、面对指责时的防御机制。提取为一份详细的心理学报告。\n\n聊天数据:\n{raw_chat_data}',
+    expected_output='一份结构化的目标人物心理画像报告，包含口头禅、性格弱点和沟通模式。',
+    agent=data_analyst
+)
+
+task2_build_prompt = Task(
+    description='仔细阅读首席数据解析师的报告。为你构建一个系统提示词（System Prompt）。这个Prompt必须包含：角色背景、语气要求、绝对不能说的词汇、以及几个示例对话。',
+    expected_output='一段可以直接喂给 LLM 的、高质量的 System Prompt 文本。',
+    agent=persona_engineer
+)
+
+task3_test_persona = Task(
+    description='使用灵魂架构师提供的 System Prompt，模拟一段对抗性对话。指出该 Prompt 中可能导致模型“机械化回复”的弱点，并输出最终优化后的完整 System Prompt。',
+    expected_output='最终优化版本的、可直接用于商业部署的数字分身 System Prompt。',
+    agent=qa_tester
+)
+
+# ==========================================
+# 4. 组装 Crew 并启动自动化系统
+# ==========================================
+
+cyber_distillation_crew = Crew(
+    agents=[data_analyst, persona_engineer, qa_tester],
+    tasks=[task1_analyze_data, task2_build_prompt, task3_test_persona],
+    process=Process.sequential, # 按顺序执行任务：分析 -> 写Prompt -> 测试优化
+    verbose=True
+)
+
+# 启动多 Agent 协作
+if __name__ == "__main__":
+    print("🚀 正在启动赛博炼丹多 Agent 协同系统...")
+    result = cyber_distillation_crew.kickoff()
+
+    print("\n" + "="*50)
+    print("✨ 最终产出的完美系统指令 (System Prompt):")
+    print("="*50)
+    print(result)
