@@ -1,0 +1,3 @@
+<view class="ai-parser">
+  <button bindtap="onParse">AI 解析</button>
+</view>

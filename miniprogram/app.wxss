@@ -1,0 +1,2 @@
+/* global styles */
+page { padding: 16px; font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial }

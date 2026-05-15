@@ -1,0 +1,18 @@
+<view class="container">
+  <view class="header">
+    <input placeholder="输入备忘内容" bindinput="onInput" value="{{draft}}" />
+    <button bindtap="createNote">保存</button>
+  </view>
+
+  <view class="list">
+    <block wx:for="{{notes}}" wx:key="id">
+      <view class="note">
+        <view class="title">{{item.title || ('笔记 #' + item.id)}}</view>
+        <view class="content">{{item.content}}</view>
+        <button bindtap="parseNote" data-id="{{item.id}}">AI 解析</button>
+        <button bindtap="deleteNote" data-id="{{item.id}}">删除</button>
+        <view wx:if="{{item.parsed}}" class="parsed">解析结果：{{item.parsed}}</view>
+      </view>
+    </block>
+  </view>
+</view>
