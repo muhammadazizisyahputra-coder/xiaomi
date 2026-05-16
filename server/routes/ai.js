@@ -16,6 +16,7 @@ router.post('/parse', auth, async (req, res) => {
 
     // Log whether MIMO env is configured (do not print keys)
     console.log('[api/ai/parse] MIMO configured:', !!process.env.MIMO_API_URL, !!process.env.MIMO_API_KEY);
+    console.log('[api/ai/parse] 当前使用的 API Key 前四位是:', process.env.MIMO_API_KEY?.substring(0, 4));
 
     // If mimo is not configured, mark task as error immediately with clear message
     if (!process.env.MIMO_API_URL || !process.env.MIMO_API_KEY) {

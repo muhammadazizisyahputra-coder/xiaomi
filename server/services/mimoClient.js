@@ -8,6 +8,7 @@ async function parseText(text) {
   }
 
   try {
+    console.log('[mimoClient] Using MIMO API Key prefix:', process.env.MIMO_API_KEY?.substring(0, 4));
     const res = await axios.post(process.env.MIMO_API_URL, { text }, {
       headers: {
         Authorization: `Bearer ${process.env.MIMO_API_KEY}`,
@@ -18,14 +19,14 @@ async function parseText(text) {
     return res.data;
   } catch (err) {
     // Log detailed information to help debugging
-    console.error('MIMO API request failed. URL:', process.env.MIMO_API_URL);
+    console.error('[mimoClient] MIMO API request failed. URL:', process.env.MIMO_API_URL);
     if (err.response) {
-      console.error('MIMO response status:', err.response.status);
-      console.error('MIMO response data:', err.response.data);
+      console.error('[mimoClient] MIMO response status:', err.response.status);
+      console.error('[mimoClient] MIMO response data:', err.response.data);
     } else {
-      console.error('MIMO request error:', err.message);
+      console.error('[mimoClient] MIMO request error:', err.message);
     }
-    // Re-throw so caller can mark task as error
+    // Re-throw so caller can mark task as error or mock
     throw err;
   }
 }
