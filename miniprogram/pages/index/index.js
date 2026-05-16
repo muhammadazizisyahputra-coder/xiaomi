@@ -11,7 +11,7 @@ Page({
   async fetchNotes() {
     try {
       const res = await api.get('/notes');
-      this.setData({ notes: res });
+      this.setData({ notes: res || [] });
     } catch (err) {
       console.error(err);
       wx.showToast({ title: '获取笔记失败', icon: 'none' });
@@ -50,5 +50,9 @@ Page({
   },
   goRegister() {
     wx.navigateTo({ url: '/pages/register/register' });
+  },
+  focusInput() {
+    // focus not straightforward; just show toast to instruct
+    wx.showToast({ title: '请在下方输入框输入备忘并保存', icon: 'none' });
   }
 });

@@ -3,11 +3,48 @@
     <view class="title">{{note.title || ('笔记 #' + note.id)}}</view>
     <view class="content">{{note.content}}</view>
 
-    <button bindtap="startParse" wx:if="{{!parsing}}">AI 解析</button>
-    <button bindtap="cancelPolling" wx:if="{{parsing}}">取消解析</button>
+    <view class="actions">
+      <button bindtap="startParse" wx:if="{{!parsing}}">AI 解析</button>
+      <button bindtap="cancelPolling" wx:if="{{parsing}}">取消解析</button>
+    </view>
 
     <view class="status">状态：{{taskStatus}}</view>
 
-    <view wx:if="{{note.parsed}}" class="parsed">解析结果：{{formattedResult}}</view>
+    <block wx:if="{{formatted.times.length || formatted.locations.length || formatted.tasks.length || formatted.summary}}">
+      <view class="parsed-section">
+        <view wx:if="{{formatted.times.length}}">
+          <view class="label">时间</view>
+          <block wx:for="{{formatted.times}}" wx:key="index">
+            <view class="value">{{item}}</view>
+          </block>
+        </view>
+
+        <view wx:if="{{formatted.locations.length}}">
+          <view class="label">地点</view>
+          <block wx:for="{{formatted.locations}}" wx:key="index">
+            <view class="value">{{item}}</view>
+          </block>
+        </view>
+
+        <view wx:if="{{formatted.tasks.length}}">
+          <view class="label">任务</view>
+          <block wx:for="{{formatted.tasks}}" wx:key="index">
+            <view class="value">- {{item}}</view>
+          </block>
+        </view>
+
+        <view wx:if="{{formatted.summary}}">
+          <view class="label">摘要</view>
+          <view class="value">{{formatted.summary}}</view>
+        </view>
+
+      </view>
+    </block>
+
+    <view wx:if="{{!formatted.times.length && !formatted.locations.length && !formatted.tasks.length && !formatted.summary && formatted.raw}}" class="raw">
+      <view class="label">解析原始内容</view>
+      <view class="value">{{formatted.raw}}</view>
+    </view>
+
   </view>
 </view>

@@ -1,0 +1,16 @@
+/* index styles */
+.container { padding: 16px }
+.list .note { border-bottom: 1px solid #eee; padding: 12px 0 }
+.title { font-weight: bold; margin-bottom: 6px }
+.content { color: #333; margin-bottom: 8px }
+.actions button { margin-right: 8px }
+.footer { position: fixed; left: 0; right: 0; bottom: 0; padding: 12px; display:flex; background:#fff; border-top:1px solid #eee }
+.input { flex:1; padding:8px; border:1px solid #ddd; border-radius:4px }
+.save-btn { margin-left:8px }
+
+/* empty state */
+.empty { text-align: center; padding: 40px 16px; color: #666 }
+.empty-icon { font-size: 40px; margin-bottom: 12px }
+.empty-title { font-size: 18px; font-weight: bold; margin-bottom: 6px }
+.empty-sub { margin-bottom: 12px }
+.add-btn { background: #1aad19; color: #fff }
