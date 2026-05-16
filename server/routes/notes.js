@@ -1,22 +1,23 @@
 const express = require('express');
 const router = express.Router();
 const Note = require('../models/note');
+const auth = require('../middleware/auth');
 
-// Create note
-router.post('/', async (req, res) => {
+// Create note (authenticated)
+router.post('/', auth, async (req, res) => {
   try {
     const { title, content } = req.body;
-    const note = await Note.create({ title, content });
+    const note = await Note.create({ title, content, user_id: req.userId });
     res.status(201).json(note);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// Read all notes
-router.get('/', async (req, res) => {
+// Read all notes for user
+router.get('/', auth, async (req, res) => {
   try {
-    const notes = await Note.findAll({ order: [['created_at', 'DESC']] });
+    const notes = await Note.findAll({ where: { user_id: req.userId }, order: [['created_at', 'DESC']] });
     res.json(notes);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -24,10 +25,10 @@ router.get('/', async (req, res) => {
 });
 
 // Read one
-router.get('/:id', async (req, res) => {
+router.get('/:id', auth, async (req, res) => {
   try {
     const note = await Note.findByPk(req.params.id);
-    if (!note) return res.status(404).json({ error: 'Not found' });
+    if (!note || note.user_id !== req.userId) return res.status(404).json({ error: 'Not found' });
     res.json(note);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -35,10 +36,10 @@ router.get('/:id', async (req, res) => {
 });
 
 // Update
-router.put('/:id', async (req, res) => {
+router.put('/:id', auth, async (req, res) => {
   try {
     const note = await Note.findByPk(req.params.id);
-    if (!note) return res.status(404).json({ error: 'Not found' });
+    if (!note || note.user_id !== req.userId) return res.status(404).json({ error: 'Not found' });
     const { title, content } = req.body;
     note.title = title ?? note.title;
     note.content = content ?? note.content;
@@ -50,10 +51,10 @@ router.put('/:id', async (req, res) => {
 });
 
 // Delete
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', auth, async (req, res) => {
   try {
     const note = await Note.findByPk(req.params.id);
-    if (!note) return res.status(404).json({ error: 'Not found' });
+    if (!note || note.user_id !== req.userId) return res.status(404).json({ error: 'Not found' });
     await note.destroy();
     res.json({ success: true });
   } catch (err) {

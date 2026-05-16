@@ -1,7 +1,7 @@
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../db');
 
-const Note = sequelize.define('Note', {
+const Task = sequelize.define('Task', {
   id: {
     type: DataTypes.INTEGER.UNSIGNED,
     primaryKey: true,
@@ -11,18 +11,27 @@ const Note = sequelize.define('Note', {
     type: DataTypes.INTEGER.UNSIGNED,
     allowNull: false,
   },
-  title: {
-    type: DataTypes.STRING(255),
+  note_id: {
+    type: DataTypes.INTEGER.UNSIGNED,
     allowNull: true,
   },
   content: {
     type: DataTypes.TEXT,
     allowNull: false,
   },
-  parsed: {
+  status: {
+    type: DataTypes.ENUM('pending','processing','done','error'),
+    allowNull: false,
+    defaultValue: 'pending'
+  },
+  result: {
     type: DataTypes.JSON,
-    allowNull: true,
+    allowNull: true
+  },
+  error_message: {
+    type: DataTypes.TEXT,
+    allowNull: true
   }
 });
 
-module.exports = Note;
+module.exports = Task;

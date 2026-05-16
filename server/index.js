@@ -9,8 +9,10 @@ app.use(cors());
 app.use(express.json());
 
 // routes
+app.use('/api/auth', require('./routes/auth'));
 app.use('/api/notes', require('./routes/notes'));
 app.use('/api/ai', require('./routes/ai'));
+app.use('/api/ai', require('./routes/aiTasks'));
 
 const PORT = process.env.PORT || 8080;
 
@@ -25,6 +27,10 @@ const PORT = process.env.PORT || 8080;
     app.listen(PORT, () => {
       console.log(`Server listening on port ${PORT}`);
     });
+
+    // start background worker
+    const { startWorker } = require('./worker');
+    startWorker();
   } catch (err) {
     console.error('Unable to start server:', err);
     process.exit(1);

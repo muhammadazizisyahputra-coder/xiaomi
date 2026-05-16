@@ -1,9 +1,9 @@
 // simple wrapper for backend API calls
 const BASE = 'https://YOUR_SERVER_URL'; // <-- replace with your deployed server
 
-function handleRes(res) {
-  if (res.statusCode && res.statusCode !== 200) throw new Error('Network error');
-  return res.data;
+function getTokenHeader() {
+  const token = wx.getStorageSync('token');
+  return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
 module.exports = {
@@ -12,6 +12,7 @@ module.exports = {
       wx.request({
         url: BASE + '/api' + path,
         method: 'GET',
+        header: Object.assign({ 'Content-Type': 'application/json' }, getTokenHeader()),
         success(r) { resolve(r.data); },
         fail(err) { reject(err); }
       })
@@ -23,7 +24,7 @@ module.exports = {
         url: BASE + '/api' + path,
         method: 'POST',
         data,
-        header: { 'Content-Type': 'application/json' },
+        header: Object.assign({ 'Content-Type': 'application/json' }, getTokenHeader()),
         success(r) { resolve(r.data); },
         fail(err) { reject(err); }
       })
@@ -34,6 +35,7 @@ module.exports = {
       wx.request({
         url: BASE + '/api' + path,
         method: 'DELETE',
+        header: Object.assign({ 'Content-Type': 'application/json' }, getTokenHeader()),
         success(r) { resolve(r.data); },
         fail(err) { reject(err); }
       })
