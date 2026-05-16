@@ -1,15 +1,15 @@
-/* styles for detail page */
+/* detail.wxss - upgraded card visuals */
 .container { padding: 16px }
 .note { background: transparent }
 .title { font-weight: bold; font-size:16px; margin-bottom:8px }
 .content { margin-bottom:12px }
 .actions { position: relative; height: 0 }
-.float-parse { position: fixed; right: 20px; bottom: 80px; background: linear-gradient(135deg,#ff7a7a,#ffb86b); color:#fff; border-radius:30px; padding:12px 18px; box-shadow:0 6px 16px rgba(0,0,0,0.12) }
+.float-parse { position: fixed; right: 20px; bottom: 80px; background: linear-gradient(135deg,#7b61ff,#4b8cff); color:#fff; border-radius:30px; padding:14px 20px; box-shadow:0 8px 24px rgba(75,140,255,0.18); font-weight:700 }
 .float-cancel { position: fixed; right: 20px; bottom: 80px; background:#fff; color:#333; border-radius:30px; padding:10px 14px; box-shadow:0 6px 16px rgba(0,0,0,0.06) }
 .status { margin-top:8px; color:#888 }
 .cards { display:flex; gap:12px; margin-top:12px }
-.info-card { background:#fff; flex:1; padding:12px; border-radius:10px; box-shadow: 0 2px 6px rgba(30,30,30,0.06); text-align:center }
-.icon { font-size:22px }
-.label { color:#999; margin-top:8px }
-.value { color:#333; margin-top:6px; font-weight:600 }
+.info-card { background:linear-gradient(180deg,#fff,#f7fbff); flex:1; padding:16px; border-radius:12px; box-shadow: 0 6px 20px rgba(30,30,30,0.08); text-align:center }
+.icon { font-size:26px }
+.label { color:#999; margin-top:8px; font-size:13px }
+.value { color:#333; margin-top:6px; font-weight:700; font-size:15px }
 .raw { margin-top:12px; background:#fff7e6; padding:10px; border-radius:4px }

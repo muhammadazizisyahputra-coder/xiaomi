@@ -8,10 +8,14 @@ Page({
   },
   onLoad() {
     const token = wx.getStorageSync('token');
-    this.setData({ isAuthenticated: !!token });
-    if (token) {
-      this.fetchNotes();
+    const isAuth = !!token;
+    this.setData({ isAuthenticated: isAuth });
+    if (!isAuth) {
+      // redirect to login if not authenticated
+      wx.reLaunch({ url: '/pages/login/login' });
+      return;
     }
+    this.fetchNotes();
   },
   async fetchNotes() {
     try {
@@ -32,7 +36,7 @@ Page({
     const token = wx.getStorageSync('token');
     if (!token) {
       wx.showToast({ title: '请先登录', icon: 'none' });
-      wx.navigateTo({ url: '/pages/login/login' });
+      wx.reLaunch({ url: '/pages/login/login' });
       return;
     }
     try {
@@ -76,12 +80,17 @@ Page({
     wx.vibrateShort();
     wx.showModal({
       title: '删除笔记',
-      content: '确认���除该笔记吗？此操作不可恢复。',
+      content: '确认删除该笔记吗？此操作不可恢复。',
       success(res) {
         if (res.confirm) {
           that.deleteNote({ currentTarget: { dataset: { id } } });
         }
       }
     });
+  },
+  logout() {
+    wx.vibrateShort();
+    try { wx.clearStorageSync(); } catch (e) { console.warn('clear storage failed', e); }
+    wx.reLaunch({ url: '/pages/login/login' });
   }
 });
