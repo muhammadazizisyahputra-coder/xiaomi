@@ -1,11 +1,11 @@
 const { parseText } = require('./services/mimoClient');
 const Task = require('./models/task');
 const Note = require('./models/note');
-const { sequelize } = require('./db');
 
 let running = false;
 
 async function processOne(task) {
+  console.log('[worker] start processing task', task.id, 'note_id=', task.note_id, 'user_id=', task.user_id);
   try {
     // mark processing
     task.status = 'processing';
@@ -16,20 +16,29 @@ async function processOne(task) {
 
     task.result = resp;
     task.status = 'done';
+    task.error_message = null;
     await task.save();
+
+    console.log('[worker] task processed', task.id, 'status=done');
 
     if (task.note_id) {
       const note = await Note.findByPk(task.note_id);
       if (note) {
         note.parsed = resp;
         await note.save();
+        console.log('[worker] note updated with parsed result for note', note.id);
       }
     }
   } catch (err) {
-    console.error('Worker error processing task', task.id, err?.message || err);
-    task.status = 'error';
-    task.error_message = (err?.message || JSON.stringify(err)) + '';
-    await task.save();
+    // Catch and record error on the task instead of letting the worker crash
+    console.error('[worker] error processing task', task.id, err?.response?.data || err?.message || err);
+    try {
+      task.status = 'error';
+      task.error_message = (err?.response?.data && JSON.stringify(err.response.data)) || err.message || String(err);
+      await task.save();
+    } catch (saveErr) {
+      console.error('[worker] failed to save task error state for task', task.id, saveErr);
+    }
   }
 }
 
@@ -38,12 +47,18 @@ async function workerLoop() {
   running = true;
   try {
     const pending = await Task.findAll({ where: { status: 'pending' }, limit: 5, order: [['created_at', 'ASC']] });
+    if (pending.length === 0) {
+      // nothing to do
+      running = false;
+      return;
+    }
+    console.log('[worker] found', pending.length, 'pending tasks');
     for (const task of pending) {
       // process sequentially to keep things simple
       await processOne(task);
     }
   } catch (err) {
-    console.error('Worker loop error', err);
+    console.error('[worker] Worker loop error', err);
   } finally {
     running = false;
   }
@@ -52,7 +67,7 @@ async function workerLoop() {
 function startWorker() {
   const interval = parseInt(process.env.TASK_POLL_INTERVAL || '3000', 10);
   setInterval(workerLoop, interval);
-  console.log('Background worker started, polling every', interval, 'ms');
+  console.log('[worker] Background worker started, polling every', interval, 'ms');
 }
 
 module.exports = { startWorker };

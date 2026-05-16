@@ -3,10 +3,15 @@ const api = require('../../utils/api');
 Page({
   data: {
     draft: '',
-    notes: []
+    notes: [],
+    isAuthenticated: false
   },
   onLoad() {
-    this.fetchNotes();
+    const token = wx.getStorageSync('token');
+    this.setData({ isAuthenticated: !!token });
+    if (token) {
+      this.fetchNotes();
+    }
   },
   async fetchNotes() {
     try {
@@ -23,6 +28,12 @@ Page({
   async createNote() {
     const content = this.data.draft.trim();
     if (!content) return wx.showToast({ title: '内容为空', icon: 'none' });
+    const token = wx.getStorageSync('token');
+    if (!token) {
+      wx.showToast({ title: '请先登录', icon: 'none' });
+      wx.navigateTo({ url: '/pages/login/login' });
+      return;
+    }
     try {
       await api.post('/notes', { content });
       this.setData({ draft: '' });
@@ -52,7 +63,6 @@ Page({
     wx.navigateTo({ url: '/pages/register/register' });
   },
   focusInput() {
-    // focus not straightforward; just show toast to instruct
     wx.showToast({ title: '请在下方输入框输入备忘并保存', icon: 'none' });
   }
 });

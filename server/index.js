@@ -16,23 +16,31 @@ app.use('/api/ai', require('./routes/aiTasks'));
 
 const PORT = process.env.PORT || 8080;
 
+// Global error handlers to ensure server logs unexpected problems
+process.on('unhandledRejection', (reason, p) => {
+  console.error('[server] Unhandled Rejection at:', p, 'reason:', reason);
+});
+process.on('uncaughtException', (err) => {
+  console.error('[server] Uncaught Exception thrown', err);
+});
+
 // Test DB and start
 (async () => {
   try {
     await sequelize.authenticate();
-    console.log('Database connected');
+    console.log('[server] Database connected');
     // Do not force sync in production. Run migrations instead.
     await sequelize.sync();
 
     app.listen(PORT, () => {
-      console.log(`Server listening on port ${PORT}`);
+      console.log(`[server] Server listening on port ${PORT}`);
     });
 
     // start background worker
     const { startWorker } = require('./worker');
     startWorker();
   } catch (err) {
-    console.error('Unable to start server:', err);
+    console.error('[server] Unable to start server:', err);
     process.exit(1);
   }
 })();

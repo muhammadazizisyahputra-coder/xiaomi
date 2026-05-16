@@ -1,6 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const axios = require('axios');
 const Task = require('../models/task');
 const auth = require('../middleware/auth');
 
@@ -10,12 +9,28 @@ router.post('/parse', auth, async (req, res) => {
     const { noteId, content } = req.body;
     if (!content) return res.status(400).json({ error: 'content required' });
 
+    console.log('[api/ai/parse] create task for user', req.userId, 'noteId', noteId, 'content length', (content && content.length) || 0);
+
     const task = await Task.create({ user_id: req.userId, note_id: noteId || null, content, status: 'pending' });
+
+    // If mimo is not configured, mark task as error immediately with clear message
+    if (!process.env.MIMO_API_URL || !process.env.MIMO_API_KEY) {
+      const msg = 'MIMO API not configured on server.';
+      console.warn('[api/ai/parse] ' + msg);
+      try {
+        task.status = 'error';
+        task.error_message = msg;
+        await task.save();
+      } catch (err) {
+        console.error('[api/ai/parse] failed to mark task error', err);
+      }
+      return res.status(500).json({ error: msg, taskId: task.id });
+    }
 
     res.status(202).json({ taskId: task.id });
   } catch (err) {
-    console.error(err?.response?.data || err.message);
-    res.status(500).json({ error: 'Create task failed', details: err.message });
+    console.error('[api/ai/parse] Create task failed:', err?.response?.data || err.message || err);
+    res.status(500).json({ error: 'Create task failed', details: err.message || String(err) });
   }
 });
 
