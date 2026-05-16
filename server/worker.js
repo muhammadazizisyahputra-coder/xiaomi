@@ -25,6 +25,7 @@ async function processOne(task) {
       const note = await Note.findByPk(task.note_id);
       if (note) {
         note.parsed = resp;
+        note.ai_content = resp;
         await note.save();
         console.log('[worker] note updated with parsed result for note', note.id);
       }
@@ -51,6 +52,7 @@ async function processOne(task) {
         const note = await Note.findByPk(task.note_id);
         if (note) {
           note.parsed = mockResult;
+          note.ai_content = mockResult;
           await note.save();
           console.log('[worker] note updated with mock parsed result for note', note.id);
         }

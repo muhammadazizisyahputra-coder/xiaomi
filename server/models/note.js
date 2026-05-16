@@ -22,6 +22,10 @@ const Note = sequelize.define('Note', {
   parsed: {
     type: DataTypes.JSON,
     allowNull: true,
+  },
+  ai_content: {
+    type: DataTypes.JSON,
+    allowNull: true,
   }
 });
 

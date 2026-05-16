@@ -4,44 +4,36 @@
     <view class="content">{{note.content}}</view>
 
     <view class="actions">
-      <button bindtap="startParse" wx:if="{{!parsing}}">AI 解析</button>
-      <button bindtap="cancelPolling" wx:if="{{parsing}}">取消解析</button>
+      <button class="float-parse" bindtap="startParse" wx:if="{{!parsing}}">🔮 AI 解析</button>
+      <button class="float-cancel" bindtap="cancelPolling" wx:if="{{parsing}}">✖ 取消</button>
     </view>
 
     <view class="status">状态：{{taskStatus}}</view>
 
-    <block wx:if="{{formatted.times.length || formatted.locations.length || formatted.tasks.length || formatted.summary}}">
-      <view class="parsed-section">
-        <view wx:if="{{formatted.times.length}}">
+    <block wx:if="{{formattedAvailable}}">
+      <view class="cards">
+        <view class="info-card">
+          <view class="icon">📅</view>
           <view class="label">时间</view>
-          <block wx:for="{{formatted.times}}" wx:key="index">
-            <view class="value">{{item}}</view>
-          </block>
+          <view class="value">{{formatted.time || '--'}}</view>
         </view>
 
-        <view wx:if="{{formatted.locations.length}}">
+        <view class="info-card">
+          <view class="icon">📍</view>
           <view class="label">地点</view>
-          <block wx:for="{{formatted.locations}}" wx:key="index">
-            <view class="value">{{item}}</view>
-          </block>
+          <view class="value">{{formatted.location || '--'}}</view>
         </view>
 
-        <view wx:if="{{formatted.tasks.length}}">
+        <view class="info-card">
+          <view class="icon">📝</view>
           <view class="label">任务</view>
-          <block wx:for="{{formatted.tasks}}" wx:key="index">
-            <view class="value">- {{item}}</view>
-          </block>
-        </view>
-
-        <view wx:if="{{formatted.summary}}">
-          <view class="label">摘要</view>
-          <view class="value">{{formatted.summary}}</view>
+          <view class="value">{{formatted.task || '--'}}</view>
         </view>
 
       </view>
     </block>
 
-    <view wx:if="{{!formatted.times.length && !formatted.locations.length && !formatted.tasks.length && !formatted.summary && formatted.raw}}" class="raw">
+    <view wx:if="{{!formattedAvailable && formatted.raw}}" class="raw">
       <view class="label">解析原始内容</view>
       <view class="value">{{formatted.raw}}</view>
     </view>

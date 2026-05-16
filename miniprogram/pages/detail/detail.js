@@ -1,60 +1,24 @@
 const api = require('../../utils/api');
 let pollInterval = null;
 
-function normalizeArray(v) {
-  if (!v) return [];
-  if (Array.isArray(v)) return v.map(String);
-  return [String(v)];
-}
-
-function extractFromParsed(parsed) {
-  const result = { times: [], locations: [], tasks: [], summary: '', raw: '' };
-  if (!parsed) return result;
-  // if string, try parse JSON
+function extractSingle(parsed) {
+  if (!parsed) return { time: '', location: '', task: '', raw: '' };
   if (typeof parsed === 'string') {
-    try { parsed = JSON.parse(parsed); } catch (e) { result.raw = parsed; return result; }
+    try { parsed = JSON.parse(parsed); } catch (e) { return { time: '', location: '', task: '', raw: parsed }; }
   }
-  if (typeof parsed !== 'object') {
-    result.raw = String(parsed);
-    return result;
-  }
-
-  // Common heuristics
-  const pushIf = (target, v) => { if (!v) return; if (Array.isArray(v)) v.forEach(x => target.push(String(x))); else target.push(String(v)); };
-
-  // times: try several keys
-  pushIf(result.times, parsed.time || parsed.times || parsed.datetime || parsed.date || parsed.dates || parsed.when || parsed.reminder_time);
-  // locations
-  pushIf(result.locations, parsed.location || parsed.locations || parsed.place || parsed.venue);
-  // tasks or actions
-  pushIf(result.tasks, parsed.tasks || parsed.actions || parsed.todos || parsed.items || parsed.tasks_list || parsed.instructions);
-
-  // entities scanning
-  if (parsed.entities && Array.isArray(parsed.entities)) {
-    parsed.entities.forEach(ent => {
-      if (!ent || !ent.type || !ent.value) return;
-      const t = String(ent.type).toLowerCase();
-      if (t.includes('time') || t.includes('date')) pushIf(result.times, ent.value);
-      if (t.includes('location') || t.includes('place')) pushIf(result.locations, ent.value);
-      if (t.includes('task') || t.includes('todo') || t.includes('action')) pushIf(result.tasks, ent.value);
-    });
-  }
-
-  // summary or text
-  if (parsed.summary) result.summary = String(parsed.summary);
-  else if (parsed.text) result.summary = String(parsed.text);
-  else if (parsed.description) result.summary = String(parsed.description);
-
-  // fallback: if nothing captured, put raw JSON
-  if (result.times.length === 0 && result.locations.length === 0 && result.tasks.length === 0 && !result.summary) {
-    result.raw = JSON.stringify(parsed, null, 2);
-  }
-
-  return result;
+  const out = { time: '', location: '', task: '', raw: '' };
+  if (parsed.time) out.time = parsed.time;
+  else if (parsed.times && parsed.times[0]) out.time = parsed.times[0];
+  if (parsed.location) out.location = parsed.location;
+  else if (parsed.locations && parsed.locations[0]) out.location = parsed.locations[0];
+  if (parsed.task) out.task = parsed.task;
+  else if (parsed.tasks && parsed.tasks[0]) out.task = parsed.tasks[0];
+  if (!out.time && !out.location && !out.task) out.raw = JSON.stringify(parsed, null, 2);
+  return out;
 }
 
 Page({
-  data: { note: {}, parsing: false, taskStatus: '', formatted: { times: [], locations: [], tasks: [], summary: '', raw: '' } },
+  data: { note: {}, parsing: false, taskStatus: '', formatted: { time:'', location:'', task:'', raw:'' }, formattedAvailable: false },
   onLoad(options) {
     this.noteId = options.id;
     this.fetchNote();
@@ -62,8 +26,10 @@ Page({
   async fetchNote() {
     try {
       const note = await api.get(`/notes/${this.noteId}`);
-      const formatted = extractFromParsed(note.parsed);
-      this.setData({ note, formatted });
+      // prefer ai_content if present
+      const parsedSource = note.ai_content || note.parsed || null;
+      const formatted = extractSingle(parsedSource);
+      this.setData({ note, formatted, formattedAvailable: !!(formatted.time || formatted.location || formatted.task) });
     } catch (err) {
       wx.showToast({ title: '获取笔记失败', icon: 'none' });
     }
@@ -71,6 +37,7 @@ Page({
   async startParse() {
     if (this.data.parsing) return;
     this.setData({ parsing: true, taskStatus: 'pending' });
+    wx.vibrateShort();
     wx.showLoading({ title: '解析中...', mask: true });
     try {
       const resp = await api.post('/ai/parse', { noteId: this.noteId, content: this.data.note.content });
@@ -94,12 +61,13 @@ Page({
           pollInterval = null;
           this.setData({ parsing: false });
           wx.hideLoading();
+          wx.vibrateShort();
           wx.showToast({ title: '解析完成', icon: 'success' });
           if (t.result) {
-            const formatted = extractFromParsed(t.result);
-            this.setData({ formatted });
+            const formatted = extractSingle(t.result);
+            this.setData({ formatted, formattedAvailable: !!(formatted.time || formatted.location || formatted.task) });
           }
-          // refresh note to get parsed field
+          // refresh note to get ai_content
           this.fetchNote();
         } else if (t.status === 'error') {
           clearInterval(pollInterval);
@@ -120,6 +88,7 @@ Page({
     }
     this.setData({ parsing: false, taskStatus: 'cancelled' });
     wx.hideLoading();
+    wx.vibrateShort();
   },
   onUnload() {
     if (pollInterval) clearInterval(pollInterval);

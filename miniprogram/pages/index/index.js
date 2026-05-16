@@ -16,7 +16,8 @@ Page({
   async fetchNotes() {
     try {
       const res = await api.get('/notes');
-      this.setData({ notes: res || [] });
+      const notes = (res || []).map(n => ({ ...n, displayDate: new Date(n.created_at).toLocaleString() }));
+      this.setData({ notes });
     } catch (err) {
       console.error(err);
       wx.showToast({ title: '获取笔记失败', icon: 'none' });
@@ -35,6 +36,7 @@ Page({
       return;
     }
     try {
+      wx.vibrateShort();
       await api.post('/notes', { content });
       this.setData({ draft: '' });
       this.fetchNotes();
@@ -46,6 +48,7 @@ Page({
   async deleteNote(e) {
     const id = e.currentTarget.dataset.id;
     try {
+      wx.vibrateShort();
       await api.delete(`/notes/${id}`);
       this.fetchNotes();
     } catch (err) {
@@ -57,12 +60,28 @@ Page({
     wx.navigateTo({ url: `/pages/detail/detail?id=${id}` });
   },
   goLogin() {
+    wx.vibrateShort();
     wx.navigateTo({ url: '/pages/login/login' });
   },
   goRegister() {
+    wx.vibrateShort();
     wx.navigateTo({ url: '/pages/register/register' });
   },
   focusInput() {
     wx.showToast({ title: '请在下方输入框输入备忘并保存', icon: 'none' });
+  },
+  async onLongPressDelete(e) {
+    const id = e.currentTarget.dataset.id;
+    const that = this;
+    wx.vibrateShort();
+    wx.showModal({
+      title: '删除笔记',
+      content: '确认���除该笔记吗？此操作不可恢复。',
+      success(res) {
+        if (res.confirm) {
+          that.deleteNote({ currentTarget: { dataset: { id } } });
+        }
+      }
+    });
   }
 });

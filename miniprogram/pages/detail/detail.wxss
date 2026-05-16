@@ -1,10 +1,15 @@
 /* styles for detail page */
 .container { padding: 16px }
-.note .title { font-weight: bold; font-size:16px; margin-bottom:8px }
-.note .content { margin-bottom:12px }
-.note .actions button { margin-right:8px }
-.note .status { margin-top:8px; color:#888 }
-.parsed-section { margin-top:12px; background:#fbfbfb; padding:10px; border-radius:6px }
-.label { font-weight:600; color:#333; margin-top:8px }
-.value { color:#555; margin-top:6px }
+.note { background: transparent }
+.title { font-weight: bold; font-size:16px; margin-bottom:8px }
+.content { margin-bottom:12px }
+.actions { position: relative; height: 0 }
+.float-parse { position: fixed; right: 20px; bottom: 80px; background: linear-gradient(135deg,#ff7a7a,#ffb86b); color:#fff; border-radius:30px; padding:12px 18px; box-shadow:0 6px 16px rgba(0,0,0,0.12) }
+.float-cancel { position: fixed; right: 20px; bottom: 80px; background:#fff; color:#333; border-radius:30px; padding:10px 14px; box-shadow:0 6px 16px rgba(0,0,0,0.06) }
+.status { margin-top:8px; color:#888 }
+.cards { display:flex; gap:12px; margin-top:12px }
+.info-card { background:#fff; flex:1; padding:12px; border-radius:10px; box-shadow: 0 2px 6px rgba(30,30,30,0.06); text-align:center }
+.icon { font-size:22px }
+.label { color:#999; margin-top:8px }
+.value { color:#333; margin-top:6px; font-weight:600 }
 .raw { margin-top:12px; background:#fff7e6; padding:10px; border-radius:4px }

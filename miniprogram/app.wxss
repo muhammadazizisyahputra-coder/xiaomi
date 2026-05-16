@@ -1,2 +1,2 @@
 /* global styles */
-page { padding: 16px; font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial }
+page { padding: 16px; font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial; background-color: #F7F8FA }
