@@ -1,0 +1,4 @@
+/* basic styles for auth page */
+.container { padding: 16px }
+.form input { display:block; margin-bottom:12px; padding:8px; border:1px solid #ddd }
+.form button { margin-right:8px }

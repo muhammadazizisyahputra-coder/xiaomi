@@ -1,6 +1,9 @@
 {
   "pages": [
-    "pages/index/index"
+    "pages/index/index",
+    "pages/detail/detail",
+    "pages/login/login",
+    "pages/register/register"
   ],
   "window": {
     "navigationBarTitleText": "AI Notes"

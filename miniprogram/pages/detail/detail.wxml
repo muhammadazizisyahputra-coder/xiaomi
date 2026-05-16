@@ -1,0 +1,13 @@
+<view class="container">
+  <view class="note">
+    <view class="title">{{note.title || ('笔记 #' + note.id)}}</view>
+    <view class="content">{{note.content}}</view>
+
+    <button bindtap="startParse" wx:if="{{!parsing}}">AI 解析</button>
+    <button bindtap="cancelPolling" wx:if="{{parsing}}">取消解析</button>
+
+    <view class="status">状态：{{taskStatus}}</view>
+
+    <view wx:if="{{note.parsed}}" class="parsed">解析结果：{{formattedResult}}</view>
+  </view>
+</view>

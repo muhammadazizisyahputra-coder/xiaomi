@@ -9,8 +9,13 @@ Page({
     this.fetchNotes();
   },
   async fetchNotes() {
-    const res = await api.get('/notes');
-    this.setData({ notes: res });
+    try {
+      const res = await api.get('/notes');
+      this.setData({ notes: res });
+    } catch (err) {
+      console.error(err);
+      wx.showToast({ title: '获取笔记失败', icon: 'none' });
+    }
   },
   onInput(e) {
     this.setData({ draft: e.detail.value });
@@ -18,21 +23,32 @@ Page({
   async createNote() {
     const content = this.data.draft.trim();
     if (!content) return wx.showToast({ title: '内容为空', icon: 'none' });
-    await api.post('/notes', { content });
-    this.setData({ draft: '' });
-    this.fetchNotes();
+    try {
+      await api.post('/notes', { content });
+      this.setData({ draft: '' });
+      this.fetchNotes();
+    } catch (err) {
+      wx.showToast({ title: '保存失败', icon: 'none' });
+      console.error(err);
+    }
   },
   async deleteNote(e) {
     const id = e.currentTarget.dataset.id;
-    await api.delete(`/notes/${id}`);
-    this.fetchNotes();
+    try {
+      await api.delete(`/notes/${id}`);
+      this.fetchNotes();
+    } catch (err) {
+      wx.showToast({ title: '删除失败', icon: 'none' });
+    }
   },
-  async parseNote(e) {
+  openDetail(e) {
     const id = e.currentTarget.dataset.id;
-    const note = this.data.notes.find(n => n.id === id);
-    if (!note) return;
-    const resp = await api.post('/ai/parse', { noteId: id, content: note.content });
-    wx.showToast({ title: '解析完成', icon: 'success' });
-    this.fetchNotes();
+    wx.navigateTo({ url: `/pages/detail/detail?id=${id}` });
+  },
+  goLogin() {
+    wx.navigateTo({ url: '/pages/login/login' });
+  },
+  goRegister() {
+    wx.navigateTo({ url: '/pages/register/register' });
   }
 });
